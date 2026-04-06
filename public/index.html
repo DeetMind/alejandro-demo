@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alejandro | Coaching Documentation Assistant</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    min-height: 100vh;
+  }
+
+  .top-bar {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .top-bar h1 { font-size: 17px; letter-spacing: 0.08em; font-weight: 600; }
+  .top-bar p  { font-size: 12px; color: #888; margin-top: 3px; }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .tag-basic { background: #e8e8e8; color: #555; }
+  .tag-pro   { background: #1a1a1a; color: #fff; border: 1px solid #444; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 36px 24px; }
+
+  .notes-box {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .notes-header {
+    padding: 14px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .notes-header:hover { background: #f3f3f3; }
+  .toggle-icon { font-size: 14px; color: #bbb; }
+
+  .notes-body {
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #444;
+    white-space: pre-wrap;
+    display: none;
+  }
+
+  .run-btn {
+    width: 100%;
+    padding: 16px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 28px;
+  }
+  .run-btn:hover:not(:disabled) { background: #333; }
+  .run-btn:disabled { background: #999; cursor: not-allowed; }
+
+  .loading {
+    text-align: center;
+    padding: 48px 0;
+    display: none;
+  }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #1a1a1a;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-steps { font-size: 13px; color: #888; }
+  .loading-step  { margin-bottom: 4px; transition: color 0.3s; }
+  .loading-step.active { color: #1a1a1a; font-weight: 500; }
+  .loading-step.done   { color: #aaa; text-decoration: line-through; }
+
+  .output { display: none; }
+
+  .card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+
+  .card-header {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #efefef;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-body p    { font-size: 15px; line-height: 1.7; margin-bottom: 10px; }
+  .card-body ul   { padding-left: 20px; margin-bottom: 10px; }
+  .card-body li   { font-size: 15px; line-height: 1.7; margin-bottom: 5px; }
+  .card-body strong { color: #111; }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid #ddd;
+    color: #888;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .reset-btn:hover { border-color: #aaa; color: #444; }
+
+  .error-msg {
+    background: #fff5f5;
+    border: 1px solid #fcc;
+    color: #c00;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 14px;
+    display: none;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1>ALEJANDRO</h1>
+    <p>Coaching Documentation Assistant &nbsp;·&nbsp; Demo</p>
+  </div>
+  <div style="text-align:right; font-size:12px; color:#666;">
+    Marcus Webb &nbsp;·&nbsp; Session 4 &nbsp;·&nbsp; April 3, 2026
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Raw notes (collapsible) -->
+  <div class="notes-box">
+    <div class="notes-header" onclick="toggleNotes()">
+      <span>Session 4 — Raw Input Notes</span>
+      <span class="toggle-icon" id="toggle-icon">▼ show</span>
+    </div>
+    <div class="notes-body" id="notes-body">april 3 call w marcus – about 55 min
+
+started late, he seemed distracted. said things have been "hectic" with Q1 close.
+
+came back to the team thing. said he DID have the conversation with sarah and dev – happened about 2 weeks ago. went better than expected. dev was receptive, sarah "pushed back a little" but marcus thinks she'll come around.
+
+interesting – he said he DIDN'T tell them it was about restructuring formally, just framed it as "expanded ownership." asked him why and he got a bit defensive – "i didn't want to create anxiety." we talked about that for a while. i think he's managing his own anxiety more than theirs.
+
+accountability came up again. one of his managers missed a deadline and instead of addressing it he rescheduled the check-in. "i didn't want to have the conversation when things were already stressful." classic avoidance, different form.
+
+he did mention the feedback experiment from last time – said he tried it with one person, felt uncomfortable but did it. called it "surprisingly okay." small win.
+
+commitments:
+- address the missed deadline directly with the manager before end of week
+- follow up with sarah specifically on her pushback – get clearer on what her hesitation is
+
+overall: progress on trust/delegation but avoidance pattern still showing up, now as delay vs. rewrite. Q1 restructuring officially missed but momentum exists.</div>
+  </div>
+
+  <button class="run-btn" id="run-btn" onclick="runDemo()">
+    Run Alejandro
+  </button>
+
+  <div class="error-msg" id="error-msg"></div>
+
+  <!-- Loading state -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-steps">
+      <div class="loading-step" id="step1">Structuring session notes...</div>
+      <div class="loading-step" id="step2">Retrieving prior sessions...</div>
+      <div class="loading-step" id="step3">Assembling cross-session brief...</div>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="output" id="output">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="tag tag-basic">Basic</span>
+        Current Session Summary
+      </div>
+      <div class="card-body" id="summary-body"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="tag tag-pro">Pro</span>
+        Cross-Session Brief
+      </div>
+      <div class="card-body" id="brief-body"></div>
+    </div>
+
+    <button class="reset-btn" onclick="reset()">← Run again</button>
+  </div>
+
+</div>
+
+<script>
+  function toggleNotes() {
+    const body = document.getElementById('notes-body');
+    const icon = document.getElementById('toggle-icon');
+    const visible = body.style.display === 'block';
+    body.style.display = visible ? 'none' : 'block';
+    icon.textContent = visible ? '▼ show' : '▲ hide';
+  }
+
+  function mdToHtml(text) {
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    const lines = html.split('\n');
+    const out = [];
+    let inList = false;
+
+    for (const raw of lines) {
+      const line = raw
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+      if (/^(\d+\.|[-•])\s/.test(raw)) {
+        if (!inList) { out.push('<ul>'); inList = true; }
+        out.push(`<li>${line.replace(/^(\d+\.|[-•])\s/, '')}</li>`);
+      } else {
+        if (inList) { out.push('</ul>'); inList = false; }
+        if (raw.trim() === '') out.push('<br>');
+        else out.push(`<p>${line}</p>`);
+      }
+    }
+    if (inList) out.push('</ul>');
+    return out.join('\n');
+  }
+
+  async function runDemo() {
+    const btn = document.getElementById('run-btn');
+    const loading = document.getElementById('loading');
+    const output = document.getElementById('output');
+    const errorMsg = document.getElementById('error-msg');
+
+    btn.disabled = true;
+    btn.textContent = 'Running...';
+    loading.style.display = 'block';
+    output.style.display = 'none';
+    errorMsg.style.display = 'none';
+
+    // Animate loading steps
+    const steps = ['step1', 'step2', 'step3'];
+    let stepIndex = 0;
+    document.getElementById(steps[0]).classList.add('active');
+
+    const stepTimer = setInterval(() => {
+      if (stepIndex < steps.length - 1) {
+        document.getElementById(steps[stepIndex]).classList.remove('active');
+        document.getElementById(steps[stepIndex]).classList.add('done');
+        stepIndex++;
+        document.getElementById(steps[stepIndex]).classList.add('active');
+      }
+    }, 5000);
+
+    try {
+      const resp = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      clearInterval(stepTimer);
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.error || 'Something went wrong');
+      }
+
+      const data = await resp.json();
+
+      document.getElementById('summary-body').innerHTML = mdToHtml(data.summary);
+      document.getElementById('brief-body').innerHTML   = mdToHtml(data.brief);
+
+      loading.style.display = 'none';
+      output.style.display  = 'block';
+
+    } catch (err) {
+      clearInterval(stepTimer);
+      loading.style.display = 'none';
+      errorMsg.textContent  = 'Error: ' + err.message;
+      errorMsg.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Run Alejandro';
+    }
+  }
+
+  function reset() {
+    document.getElementById('output').style.display  = 'none';
+    document.getElementById('run-btn').disabled      = false;
+    document.getElementById('run-btn').textContent   = 'Run Alejandro';
+    ['step1','step2','step3'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('active','done');
+    });
+  }
+</script>
+</body>
+</html>
