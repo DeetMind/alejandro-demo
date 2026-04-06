@@ -1,5 +1,11 @@
 {
-  "rewrites": [
-    { "source": "/api/generate", "destination": "/api/generate.py" }
+  "version": 2,
+  "builds": [
+    { "src": "public/**/*", "use": "@vercel/static" },
+    { "src": "api/generate.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/api/generate", "dest": "/api/generate.py" },
+    { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
