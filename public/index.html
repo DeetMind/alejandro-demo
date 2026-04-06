@@ -322,8 +322,7 @@ overall: progress on trust/delegation but avoidance pattern still showing up, no
     const output = document.getElementById('output');
     const errorMsg = document.getElementById('error-msg');
 
-    btn.disabled = true;
-    btn.textContent = 'Running...';
+    btn.style.display = 'none';
     loading.style.display = 'block';
     output.style.display = 'none';
     errorMsg.style.display = 'none';
@@ -368,15 +367,13 @@ overall: progress on trust/delegation but avoidance pattern still showing up, no
       loading.style.display = 'none';
       errorMsg.textContent  = 'Error: ' + err.message;
       errorMsg.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Run Alejandro';
+      btn.style.display = 'block';
     }
   }
 
   function reset() {
-    document.getElementById('output').style.display  = 'none';
-    document.getElementById('run-btn').disabled      = false;
-    document.getElementById('run-btn').textContent   = 'Run Alejandro';
+    document.getElementById('output').style.display = 'none';
+    document.getElementById('run-btn').style.display = 'block';
     ['step1','step2','step3'].forEach(id => {
       const el = document.getElementById(id);
       el.classList.remove('active','done');
